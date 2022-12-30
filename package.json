@@ -3,7 +3,7 @@
   "displayName": "devops-commitizen",
   "description": "vscode customize commitizen support",
   "version": "1.0.0",
-  "publisher": "sweetheart",
+  "publisher": "sweetheartjq",
   "engines": {
     "vscode": "^1.30.0"
   },
@@ -19,7 +19,7 @@
     "url": "https://github.com/gujunling/devops-commitizen.git"
   },
   "author": {
-    "name": "sweetheart",
+    "name": "sweetheartjq",
     "email": "sweetheartling@163.com"
   },
   "license": "MIT",
