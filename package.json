@@ -2,7 +2,7 @@
   "name": "devops-commitizen",
   "displayName": "devops-commitizen",
   "description": "vscode customize commitizen support",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "sweetheartjq",
   "engines": {
     "vscode": "^1.30.0"
@@ -35,12 +35,14 @@
         "category": "devops-commitizen"
       }
     ],
-    "keybindings": [{
-          "command": "devops-commitizen",
-          "key": "ctrl+m",
-          "mac": "cmd+m",
-          "when": "editorFocus"
-      }]
+    "keybindings": [
+      {
+        "command": "devops-commitizen",
+        "key": "ctrl+m",
+        "mac": "cmd+m",
+        "when": "editorFocus"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
