@@ -38,7 +38,7 @@ async function commit(cwd: string, message: string): Promise<void> {
     } catch (e) {
       if (!(e instanceof Error)) return
       vscode.window.showErrorMessage(`代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范。 ${e.message}`);
-      output.appendLine('代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范');
+      output.appendLine(`代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范。 ${e.message}`);
     }
   }
 // this method is called when your extension is activated
@@ -67,6 +67,7 @@ export async function activate(context: vscode.ExtensionContext) {
         if (cz.message && vscode.workspace.workspaceFolders) {
             await commit(vscode.workspace.workspaceFolders[0].uri.fsPath, cz.message.trim());
         }
+        vscode.window.showInformationMessage(`代码提交成功了，生成的代码提交信息为： ${cz.message}`);
         // Display a message box to the user
     });
 
