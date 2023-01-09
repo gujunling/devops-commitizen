@@ -2,7 +2,7 @@
   "name": "devops-commitizen",
   "displayName": "devops-commitizen",
   "description": "vscode customize commitizen support",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "publisher": "sweetheartjq",
   "engines": {
     "vscode": "^1.30.0"
