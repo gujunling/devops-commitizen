@@ -114,8 +114,8 @@ export class Commitizen {
     return '';
   }
   // 设置commit类型
-  public async getType(): Promise<void> {
-    await askOneOf('type用于说明commit的类型', this.configs.types, pick => {
+  public async getType(): Promise<boolean> {
+   return await askOneOf('type用于说明commit的类型', this.configs.types, pick => {
       this.type = pick.label;
       console.log('commit 类型type',this.type);
     });
@@ -149,13 +149,13 @@ export class Commitizen {
   //   );
   // }
   // 设置commit简要描述
-  public async getSubject(): Promise<void> {
+  public async getSubject(): Promise<boolean> {
     const validator = (input: string) => {
       if (input.length === 0) {
-        return `subject 不能为空`;
+        return `commit 简要描述不能为空`;
       }
       return '';
     };
-    await ask('subject是本次commit目的的简短描述，一般不要超过72个字符', input => (this.subject = input), validator);   
+    return await ask('subject是本次commit的简短描述，一般不超过72个字符', input => (this.subject = input), validator);    
   }
 }

@@ -24,29 +24,44 @@ async function conditionallyStageFiles(cwd: string): Promise<void> {
       await vscode.commands.executeCommand('git.stageAll');
     } 
   }
-async function commit(cwd: string, message: string): Promise<void> {
+async function commit(cwd: string, message: string): Promise<boolean> {
     output.appendLine(`About to commit '${message}'`);
     try {
       await conditionallyStageFiles(cwd);
       const result = await execa('git', ['commit', '-m', message], {cwd});
       await vscode.commands.executeCommand('git.refresh');
-    // await vscode.commands.executeCommand('git.sync');
       if (hasOutput(result)) {
         result.stdout.split('\n').forEach((line:string) => output.appendLine(line));
         output.show();
       }
+      return true
     } catch (e) {
-      if (!(e instanceof Error)) return
-      vscode.window.showErrorMessage(`代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范。 ${e.message}`);
-      output.appendLine(`代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范。 ${e.message}`);
+      if (e instanceof Error) {
+        vscode.window.showErrorMessage(`代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范。 ${e.message}`);
+        output.appendLine(`代码提交出错了，请重新检查您的代码提交格式是否符合前端代码规范。 ${e.message}`);
+      }
+      return false
     }
   }
+async function getStageFileSum(): Promise<boolean> {
+  if(vscode.workspace.workspaceFolders){
+    const cwd = vscode.workspace.workspaceFolders[0].uri.fsPath
+    const statusFlag =  await execa('git', ['diff', '--name-only', '--cached'], {cwd});
+    if(!statusFlag.stdout){
+      console.log('暂存区中没有文件')
+      vscode.window.showErrorMessage(`git 暂存区中没有文件，请检查是否将文件添加到暂存区中或执行git add <file>命令`);
+    }
+    return Boolean(statusFlag.stdout) 
+  }
+  return false
+}
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
 
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
+    await getStageFileSum()
     console.log('Congratulations, your extension "devops-commitizen" is now active!');
     // 创建输出窗口
     output = vscode.window.createOutputChannel('devops-commitizen');
@@ -59,17 +74,28 @@ export async function activate(context: vscode.ExtensionContext) {
         // The code you place here will be executed every time your command is executed
         const cz = new Commitizen();
         await cz.reloadConfigs();
-        await cz.getType();
-        // await cz.getScope();
-        await cz.getSubject();
-        console.log('生成的代码提交信息',cz.message)
-       
-        if (cz.message && vscode.workspace.workspaceFolders) {
-            await commit(vscode.workspace.workspaceFolders[0].uri.fsPath, cz.message.trim());
+        const type = await cz.getType();
+        if(!type){
+            console.log('没有选择type')
+            vscode.window.showErrorMessage(`请选择commit 类型`);
+            return
         }
-        vscode.window.showInformationMessage(`代码提交成功了，生成的代码提交信息为： ${cz.message}`);
-        // Display a message box to the user
-    });
+          // await cz.getScope();
+        const subject =  await cz.getSubject();
+        if(!subject){
+            console.log('没有输入subject描述')
+            vscode.window.showErrorMessage(`请输入commit简要描述`);
+            return
+        }
+        
+        if (cz.message && vscode.workspace.workspaceFolders) {
+          const commitFlag = await commit(vscode.workspace.workspaceFolders[0].uri.fsPath, cz.message.trim());
+          if(commitFlag){
+            console.log('生成的代码提交信息',cz.message)
+            vscode.window.showInformationMessage(`代码提交成功了，生成的代码提交信息为： ${cz.message}`);
+          }
+        }
+      });
 
     context.subscriptions.push(disposable);
 }
