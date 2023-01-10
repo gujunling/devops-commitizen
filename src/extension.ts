@@ -61,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
-    await getStageFileSum()
+
     console.log('Congratulations, your extension "devops-commitizen" is now active!');
     // 创建输出窗口
     output = vscode.window.createOutputChannel('devops-commitizen');
@@ -74,18 +74,20 @@ export async function activate(context: vscode.ExtensionContext) {
         // The code you place here will be executed every time your command is executed
         const cz = new Commitizen();
         await cz.reloadConfigs();
+        // 校验当前工作目录的暂存区中是否存在文件，若暂存区为空则弹出提示
+        await getStageFileSum()
         const type = await cz.getType();
         if(!type){
             console.log('没有选择type')
-            vscode.window.showErrorMessage(`请选择commit 类型`);
-            return
+            vscode.window.showErrorMessage(`您还没有选择 commit 类型`);
+            // return
         }
           // await cz.getScope();
         const subject =  await cz.getSubject();
         if(!subject){
             console.log('没有输入subject描述')
-            vscode.window.showErrorMessage(`请输入commit简要描述`);
-            return
+            vscode.window.showErrorMessage(`您还没有输入 commit 简要描述`);
+            // return
         }
         
         if (cz.message && vscode.workspace.workspaceFolders) {
@@ -94,6 +96,9 @@ export async function activate(context: vscode.ExtensionContext) {
             console.log('生成的代码提交信息',cz.message)
             vscode.window.showInformationMessage(`代码提交成功了，生成的代码提交信息为： ${cz.message}`);
           }
+        }else{
+          console.log('代码提交出错了，可能是您没有选择 commit 类型或没有输入 commit 简要描述，请检查并重新尝试！')
+          vscode.window.showErrorMessage(`代码提交出错了，可能是您没有选择 commit 类型或没有输入 commit 简要描述，请检查并重新尝试`);
         }
       });
 
